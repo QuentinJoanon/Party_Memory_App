@@ -1,0 +1,7 @@
+{
+  "name": "party_memory",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
