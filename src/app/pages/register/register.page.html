@@ -1,0 +1,125 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Inscription</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true"
+  ><ion-card
+    ><ion-card-header
+      ><ion-card-title
+        >Informations personnelles</ion-card-title
+      ></ion-card-header
+    >
+    <ion-card-content>
+      <ion-item>
+        <ion-input
+          label="Nom"
+          type="text"
+          labelPlacement="floating"
+          required
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Prénom"
+          type="text"
+          labelPlacement="floating"
+          required
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Email"
+          type="email"
+          labelPlacement="floating"
+          required
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Mot de passe"
+          type="password"
+          labelPlacement="floating"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Confirmez le mot de passe"
+          type="password"
+          labelPlacement="floating"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Téléphone"
+          type="tel"
+          labelPlacement="floating"
+        ></ion-input>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Adresse</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-input
+          label="Adresse"
+          type="text"
+          labelPlacement="floating"
+          required
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Numéro de rue"
+          type="number"
+          labelPlacement="floating"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Nom de rue"
+          type="text"
+          labelPlacement="floating"
+          required
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Complément d'adresse"
+          type="text"
+          labelPlacement="floating"
+          required
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Code postal"
+          type="number"
+          labelPlacement="floating"
+          required
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Ville"
+          type="text"
+          labelPlacement="floating"
+          required
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          label="Pays"
+          type="text"
+          labelPlacement="floating"
+          required
+        ></ion-input>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+  <ion-button class="register-button" size="full">Inscription</ion-button>
+</ion-content>
