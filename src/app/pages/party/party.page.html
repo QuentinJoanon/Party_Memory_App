@@ -1,0 +1,102 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Party Memory</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-list class="member-container" lines="none">
+    <ion-item>
+      <ion-avatar slot="start"
+        ><img
+          src="https://doodleipsum.com/700x700/avatar?i=c2a46927c51b9a0707dcd491590fe419"
+          alt="avatar"
+      /></ion-avatar>
+      <ion-label>
+        <h1>Quentin Joanon</h1>
+        <p>Membre <span class="account-type">Premium</span></p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+  <ion-list>
+    <ion-list-header>
+      <ion-label>Nom de l'évenement</ion-label>
+    </ion-list-header>
+    <ion-button id="download-alert">Télécharger</ion-button>
+<ion-alert
+  trigger="download-alert"
+  header="Téléchargement"
+  message="Etes-vous sûr de vouloir récupérer les photos sur cet appareil ?"
+  [buttons]="alertButtons"
+></ion-alert>
+  </ion-list>
+  <ion-list class="gallery-container" lines="none">
+    <ion-card class="picture-container">
+      <ion-item>
+        <ion-img
+        src="https://docs-demo.ionic.io/assets/madison.jpg"
+        alt="The Wisconsin State Capitol building in Madison, WI at night"
+      ></ion-img>
+      </ion-item>
+    </ion-card>
+    <ion-card class="picture-container">
+      <ion-item>
+        <ion-img
+        src="https://docs-demo.ionic.io/assets/madison.jpg"
+        alt="The Wisconsin State Capitol building in Madison, WI at night"
+      ></ion-img>
+      </ion-item>
+    </ion-card>
+    <ion-card class="picture-container">
+      <ion-item>
+        <ion-img
+        src="https://docs-demo.ionic.io/assets/madison.jpg"
+        alt="The Wisconsin State Capitol building in Madison, WI at night"
+      ></ion-img>
+      </ion-item>
+    </ion-card>
+    <ion-card class="picture-container">
+      <ion-item>
+        <ion-img
+        src="https://docs-demo.ionic.io/assets/madison.jpg"
+        alt="The Wisconsin State Capitol building in Madison, WI at night"
+      ></ion-img>
+      </ion-item>
+    </ion-card>
+    <ion-card class="picture-container">
+      <ion-item>
+        <ion-img
+        src="https://docs-demo.ionic.io/assets/madison.jpg"
+        alt="The Wisconsin State Capitol building in Madison, WI at night"
+      ></ion-img>
+      </ion-item>
+    </ion-card>
+    <ion-card class="picture-container">
+      <ion-item>
+        <ion-img
+        src="https://docs-demo.ionic.io/assets/madison.jpg"
+        alt="The Wisconsin State Capitol building in Madison, WI at night"
+      ></ion-img>
+      </ion-item>
+    </ion-card>
+    <ion-card class="picture-container">
+      <ion-item>
+        <ion-img
+        src="https://docs-demo.ionic.io/assets/madison.jpg"
+        alt="The Wisconsin State Capitol building in Madison, WI at night"
+      ></ion-img>
+      </ion-item>
+    </ion-card>
+    <ion-card class="picture-container">
+      <ion-item>
+        <ion-img
+        src="https://docs-demo.ionic.io/assets/madison.jpg"
+        alt="The Wisconsin State Capitol building in Madison, WI at night"
+      ></ion-img>
+      </ion-item>
+    </ion-card>
+  </ion-list>
+</ion-content>

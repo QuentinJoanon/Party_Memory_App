@@ -1,0 +1,56 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Party Memory</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-list class="member-container" lines="none">
+    <ion-item>
+      <ion-avatar slot="start"
+        ><img
+          src="https://doodleipsum.com/700x700/avatar?i=c2a46927c51b9a0707dcd491590fe419"
+          alt="avatar"
+      /></ion-avatar>
+      <ion-label>
+        <h1>Quentin Joanon</h1>
+        <p>Membre <span class="account-type">Premium</span></p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+  <ion-list>
+    <ion-list-header>
+      <ion-label>Vos événements</ion-label>
+    </ion-list-header>
+    <ion-item>
+      <ion-label>30 ans Quentin</ion-label>
+      <ion-button slot="end"
+        ><ion-icon name="grid-outline"></ion-icon
+      ></ion-button>
+      <ion-button slot="end" color="danger"
+        ><ion-icon name="trash-outline"></ion-icon
+      ></ion-button>
+    </ion-item>
+    <ion-item>
+      <ion-label>Baptême Oliver</ion-label
+      ><ion-button slot="end"
+        ><ion-icon name="grid-outline"></ion-icon
+      ></ion-button>
+      <ion-button slot="end" color="danger"
+        ><ion-icon name="trash-outline"></ion-icon
+      ></ion-button>
+    </ion-item>
+    <ion-item>
+      <ion-label>Mariage Thomas et Mathilde</ion-label
+      ><ion-button slot="end"
+        ><ion-icon name="grid-outline"></ion-icon
+      ></ion-button>
+      <ion-button slot="end" color="danger"
+        ><ion-icon name="trash-outline"></ion-icon
+      ></ion-button>
+    </ion-item>
+  </ion-list>
+</ion-content>

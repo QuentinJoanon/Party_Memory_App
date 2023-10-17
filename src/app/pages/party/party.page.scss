@@ -1,0 +1,25 @@
+.member-container {
+
+  box-shadow: 0 1px 2px 1px rgb(0 0 0 / 20%);
+  margin-bottom: 1em;
+
+.account-type {
+  font-weight: bold;
+}
+}
+
+.picture-container {
+  padding: 1em 0;
+}
+
+.gallery-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  // align-items: center;
+  // padding: 1em 0;
+  ion-card{
+    margin : 1em 0;
+    max-width: 45%;
+  }
+}
