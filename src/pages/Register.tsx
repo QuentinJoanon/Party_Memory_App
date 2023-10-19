@@ -13,8 +13,18 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import "./Register.scss";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Register: React.FC = () => {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [cPassword, setCPassword] = useState<string>("");
+
+  function registerUser() {
+    console.log("registerUser", email, password, cPassword);
+  }
+
   return (
     <IonPage>
       <IonHeader>
@@ -49,6 +59,7 @@ const Register: React.FC = () => {
               <IonInput
                 label="Email"
                 type="email"
+                onIonChange={(e: any) => setEmail(e.target.value)}
                 labelPlacement="floating"
                 required
               ></IonInput>
@@ -57,6 +68,7 @@ const Register: React.FC = () => {
               <IonInput
                 label="Mot de passe"
                 type="password"
+                onIonChange={(e: any) => setPassword(e.target.value)}
                 labelPlacement="floating"
               ></IonInput>
             </IonItem>
@@ -64,6 +76,7 @@ const Register: React.FC = () => {
               <IonInput
                 label="Confirmez le mot de passe"
                 type="password"
+                onIonChange={(e: any) => setCPassword(e.target.value)}
                 labelPlacement="floating"
               ></IonInput>
             </IonItem>
@@ -76,6 +89,16 @@ const Register: React.FC = () => {
             </IonItem>
           </IonCardContent>
         </IonCard>
+        <IonButton
+          className="register-button"
+          expand="full"
+          onClick={registerUser}
+        >
+          Inscription
+        </IonButton>
+        <IonButton expand="full" fill="clear">
+          <Link to="/login">Vous avez déjà un compte ? Connectez-vous</Link>
+        </IonButton>
         <IonCard>
           <IonCardHeader>
             <IonCardTitle>Adresse</IonCardTitle>
@@ -136,9 +159,6 @@ const Register: React.FC = () => {
             </IonItem>
           </IonCardContent>
         </IonCard>
-        <IonButton className="register-button" expand="full">
-          Inscription
-        </IonButton>
       </IonContent>
     </IonPage>
   );

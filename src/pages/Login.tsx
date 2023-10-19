@@ -10,8 +10,35 @@ import {
   IonPage,
 } from "@ionic/react";
 import "./Login.scss";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { firebaseConfig } from "../firebaseConfig";
+
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import Toast from "../components/Toast";
 
 const Login: React.FC = () => {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [messageToast, setMessageToast] = useState<string>("");
+
+  const app = initializeApp(firebaseConfig);
+
+  const auth = getAuth(app);
+  function login() {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        setMessageToast("Connexion réussie");
+        const user = userCredential.user;
+        // ...
+      })
+      .catch((error) => {
+        setMessageToast("Email ou mot de passe incorrect");
+      });
+  }
+
   return (
     <IonPage>
       <IonContent fullscreen>
@@ -26,6 +53,7 @@ const Login: React.FC = () => {
                   label="Email"
                   type="email"
                   labelPlacement="floating"
+                  onIonChange={(e: any) => setEmail(e.target.value)}
                   required
                 ></IonInput>
               </IonItem>
@@ -34,19 +62,28 @@ const Login: React.FC = () => {
                   label="Mot de passe"
                   type="password"
                   labelPlacement="floating"
+                  onIonChange={(e: any) => setPassword(e.target.value)}
                   required
                 ></IonInput>
               </IonItem>
               <IonButton className="forgot-button" fill="clear" expand="full">
                 Mot de passe/identifiant oublié
               </IonButton>
-              <IonButton expand="full">Connexion</IonButton>
+              <IonButton
+                id="open-toast"
+                type="submit"
+                expand="full"
+                onClick={login}
+              >
+                Connexion
+              </IonButton>
               <IonButton expand="full" fill="clear">
-                Inscription
+                <Link to="/register">Inscription</Link>
               </IonButton>
             </IonCardContent>
           </IonCard>
         </div>
+        <Toast message={messageToast} />
       </IonContent>
     </IonPage>
   );
