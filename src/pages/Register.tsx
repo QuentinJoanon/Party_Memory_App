@@ -8,6 +8,7 @@ import {
   IonHeader,
   IonInput,
   IonItem,
+  IonLoading,
   IonPage,
   IonTitle,
   IonToolbar,
@@ -15,14 +16,42 @@ import {
 import "./Register.scss";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import Toast from "../components/Toast";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import { firebaseConfig, signUp } from "../firebaseConfig";
 
 const Register: React.FC = () => {
+  const [busy, setBusy] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [cPassword, setCPassword] = useState<string>("");
+  const [messageToast, setMessageToast] = useState<string>("");
+  const [isOpen, setIsOpen] = useState(false);
 
-  function registerUser() {
-    console.log("registerUser", email, password, cPassword);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  async function registerUser() {
+    setBusy(true);
+    if (password !== cPassword && password !== "" && cPassword !== "") {
+      setMessageToast("Les mots de passe ne correspondent pas");
+      setIsOpen(true);
+    }
+    if (email === "" || password === "" || cPassword === "") {
+      setMessageToast("Veuillez remplir tous les champs");
+      setIsOpen(true);
+    }
+    const userCredential = await signUp(email, password);
+    console.log(userCredential);
+    if (userCredential === true) {
+      setMessageToast("Inscription réussie");
+      setIsOpen(true);
+    } else {
+      setMessageToast("Veuillez réessayer");
+      setIsOpen(true);
+    }
+    setBusy(false);
   }
 
   return (
@@ -32,6 +61,11 @@ const Register: React.FC = () => {
           <IonTitle>Inscription</IonTitle>
         </IonToolbar>
       </IonHeader>
+      <IonLoading
+        message="Inscription en cours..."
+        duration={0}
+        isOpen={busy}
+      />
 
       <IonContent fullscreen>
         <IonCard>
@@ -159,6 +193,7 @@ const Register: React.FC = () => {
             </IonItem>
           </IonCardContent>
         </IonCard>
+        <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
       </IonContent>
     </IonPage>
   );

@@ -1,13 +1,20 @@
 import React from "react";
 import { IonToast } from "@ionic/react";
 
-interface ToastProps {
+export interface ToastProps {
   message: string;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 }
 
-const Toast: React.FC<ToastProps> = ({ message }) => {
+const Toast: React.FC<ToastProps> = ({ message, isOpen, setIsOpen }) => {
   return (
-    <IonToast trigger="open-toast" message={message} duration={5000}></IonToast>
+    <IonToast
+      isOpen={isOpen}
+      message={message}
+      duration={2000}
+      onDidDismiss={() => setIsOpen(false)}
+    ></IonToast>
   );
 };
 

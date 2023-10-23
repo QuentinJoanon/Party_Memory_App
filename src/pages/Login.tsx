@@ -7,36 +7,45 @@ import {
   IonContent,
   IonInput,
   IonItem,
+  IonLoading,
   IonPage,
 } from "@ionic/react";
 import "./Login.scss";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { firebaseConfig } from "../firebaseConfig";
-
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { initializeApp } from "firebase/app";
+import { Link, useHistory } from "react-router-dom";
+import { signIn } from "../firebaseConfig";
 import Toast from "../components/Toast";
+import { useDispatch } from "react-redux";
+import { setUser } from "../reducers/userSlice";
 
 const Login: React.FC = () => {
+  const [busy, setBusy] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [messageToast, setMessageToast] = useState<string>("");
+  const [isOpen, setIsOpen] = useState(false);
+  const dispatch = useDispatch();
+  const history = useHistory();
 
-  const app = initializeApp(firebaseConfig);
-
-  const auth = getAuth(app);
-  function login() {
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        setMessageToast("Connexion réussie");
-        const user = userCredential.user;
-        // ...
-      })
-      .catch((error) => {
-        setMessageToast("Email ou mot de passe incorrect");
-      });
+  async function login() {
+    setBusy(true);
+    const userCredential = await signIn(email, password);
+    console.log(userCredential.email);
+    if (userCredential.email) {
+      dispatch(
+        setUser({
+          email: userCredential.email,
+        })
+      );
+      setMessageToast("Connexion réussie");
+      setIsOpen(true);
+      setBusy(false);
+      history.replace("/home");
+    } else {
+      setMessageToast("Email ou mot de passe incorrect");
+      setIsOpen(true);
+    }
+    setBusy(false);
   }
 
   return (
@@ -47,12 +56,14 @@ const Login: React.FC = () => {
             <IonCardHeader>
               <IonCardTitle>Party Memory</IonCardTitle>
             </IonCardHeader>
+            <IonLoading message="Connexion..." duration={0} isOpen={busy} />
             <IonCardContent>
               <IonItem>
                 <IonInput
                   label="Email"
                   type="email"
                   labelPlacement="floating"
+                  name="email"
                   onIonChange={(e: any) => setEmail(e.target.value)}
                   required
                 ></IonInput>
@@ -62,6 +73,7 @@ const Login: React.FC = () => {
                   label="Mot de passe"
                   type="password"
                   labelPlacement="floating"
+                  name="password"
                   onIonChange={(e: any) => setPassword(e.target.value)}
                   required
                 ></IonInput>
@@ -83,7 +95,7 @@ const Login: React.FC = () => {
             </IonCardContent>
           </IonCard>
         </div>
-        <Toast message={messageToast} />
+        <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
       </IonContent>
     </IonPage>
   );

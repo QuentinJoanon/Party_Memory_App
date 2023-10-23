@@ -1,6 +1,7 @@
 import {
   IonApp,
   IonRouterOutlet,
+  IonSpinner,
   IonSplitPane,
   setupIonicReact,
 } from "@ionic/react";
@@ -29,29 +30,43 @@ import "./theme/variables.css";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Party from "./pages/Party";
+import { useEffect, useState } from "react";
+import { getCurrentUser } from "./firebaseConfig";
+import Dashboard from "./pages/Dashboard";
+import { useDispatch } from "react-redux";
 
 setupIonicReact();
 
-const App: React.FC = () => {
+const RoutingSystem: React.FC = () => {
   return (
-    <IonApp>
-      <IonReactRouter>
-        <IonSplitPane contentId="main">
-          <Menu />
-          <IonRouterOutlet id="main">
-            <Route path="/" exact={true}>
-              <Redirect to="/login" />
-            </Route>
-            <Route path="/home" exact component={Home} />
-            <Route path="/login" exact component={Login} />
-            <Route path="/register" exact component={Register} />
-            <Route exact path="/party" component={Party} />
-          </IonRouterOutlet>
-        </IonSplitPane>
-      </IonReactRouter>
-    </IonApp>
+    <IonReactRouter>
+      <IonRouterOutlet>
+        <Route path="/" exact component={Home} />
+        <Route path="/home" exact component={Home} />
+        <Route path="/login" exact component={Login} />
+        <Route path="/register" exact component={Register} />
+        <Route path="/dashboard" component={Dashboard} />
+      </IonRouterOutlet>
+    </IonReactRouter>
   );
+};
+
+const App: React.FC = () => {
+  const [busy, setBusy] = useState<boolean>(true);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    getCurrentUser().then((user) => {
+      if (user) {
+        window.history.replaceState({}, "", "/home");
+      } else {
+        window.history.replaceState({}, "", "/login");
+      }
+      setBusy(false);
+    });
+  }, []);
+
+  return <IonApp>{busy ? <IonSpinner /> : <RoutingSystem />}</IonApp>;
 };
 
 export default App;
