@@ -15,26 +15,29 @@ import {
 } from "@ionic/react";
 import "./Register.scss";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import Toast from "../../components/Toast";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { initializeApp } from "firebase/app";
+import { registerUser } from "../../firebaseConfig";
 // import { firebaseConfig, signUp } from "../../firebaseConfig";
 
 const Register: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [cPassword, setCPassword] = useState<string>("");
-
-  /*   const [busy, setBusy] = useState<boolean>(false);
   const [messageToast, setMessageToast] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
+  const [busy, setBusy] = useState<boolean>(false);
+  const history = useHistory();
+
+  /*   
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
   async function registerUser() {
-    setBusy(true);
+
     if (password !== cPassword && password !== "" && cPassword !== "") {
       setMessageToast("Les mots de passe ne correspondent pas");
       setIsOpen(true);
@@ -52,24 +55,30 @@ const Register: React.FC = () => {
       setMessageToast("Veuillez réessayer");
       setIsOpen(true);
     }
-    setBusy(false);
+
   } */
 
-  const auth = getAuth();
-  const handleRegister = () => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log("Registered user: ", user);
-        setEmail("");
-        setPassword("");
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log("Error ocured: ", errorCode, errorMessage);
-      });
-  };
+  async function handleRegister() {
+    if (password !== cPassword && password !== "" && cPassword !== "") {
+      setMessageToast("Les mots de passe ne correspondent pas");
+      setIsOpen(true);
+    } else if (email === "" || password === "" || cPassword === "") {
+      setMessageToast("Veuillez remplir tous les champs");
+      setIsOpen(true);
+    } else {
+      setBusy(true);
+      const userCredential = await registerUser(email, password);
+      if (userCredential === true) {
+        setMessageToast("Inscription réussie");
+        setIsOpen(true);
+        history.replace("/login");
+      } else {
+        setMessageToast("Veuillez réessayer");
+        setIsOpen(true);
+      }
+    }
+    setBusy(false);
+  }
 
   return (
     <IonPage>
@@ -78,11 +87,11 @@ const Register: React.FC = () => {
           <IonTitle>Inscription</IonTitle>
         </IonToolbar>
       </IonHeader>
-      {/*       <IonLoading
+      <IonLoading
         message="Inscription en cours..."
         duration={0}
         isOpen={busy}
-      /> */}
+      />
       <IonContent fullscreen>
         <IonCard>
           <IonCardHeader>
@@ -109,9 +118,8 @@ const Register: React.FC = () => {
               <IonInput
                 label="Email"
                 type="email"
-                onIonChange={(e: any) => {
-                  setEmail(e.target.value);
-                }}
+                value={email}
+                onIonInput={(e: any) => setEmail(e.target.value)}
                 labelPlacement="floating"
                 required
               ></IonInput>
@@ -120,7 +128,8 @@ const Register: React.FC = () => {
               <IonInput
                 label="Mot de passe"
                 type="password"
-                onIonChange={(e: any) => setPassword(e.target.value)}
+                value={password}
+                onIonInput={(e: any) => setPassword(e.target.value)}
                 labelPlacement="floating"
               ></IonInput>
             </IonItem>
@@ -128,7 +137,8 @@ const Register: React.FC = () => {
               <IonInput
                 label="Confirmez le mot de passe"
                 type="password"
-                onIonChange={(e: any) => setCPassword(e.target.value)}
+                value={cPassword}
+                onIonInput={(e: any) => setCPassword(e.target.value)}
                 labelPlacement="floating"
               ></IonInput>
             </IonItem>
@@ -211,8 +221,7 @@ const Register: React.FC = () => {
             </IonItem>
           </IonCardContent>
         </IonCard>
-        {/*         <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
-         */}{" "}
+        <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
       </IonContent>
     </IonPage>
   );

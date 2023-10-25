@@ -31,69 +31,52 @@ import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import { useEffect, useState } from "react";
-import { firebaseConfig } from "./firebaseConfig";
-import Dashboard from "./pages/Dashboard";
-import { useDispatch, useSelector } from "react-redux";
+import { auth, firebaseConfig } from "./firebaseConfig";
 import Reset from "./pages/auth/Reset";
-import Secret from "./pages/protected/ProtectedRoute";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { saveUser } from "./redux/slice/authSlice";
-import ProtectedRoute from "./pages/protected/ProtectedRoute";
+import { UserContextProvider, useUserContext } from "./context/user";
 
 setupIonicReact();
 
 const App: React.FC = () => {
-  initializeApp(firebaseConfig);
-  const auth = getAuth();
-  // const user = useSelector((state) => state.auth);
-  const isAuth = onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("user", user);
-    } else {
-      return false;
-    }
-  });
-  console.log("isAuth", isAuth);
-  // console.log("user from state", user);
-  const dispatch = useDispatch();
-  useEffect(
-    () => {
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          dispatch(
-            saveUser({
-              email: user.email,
-              accessToken: user.stsTokenManager.accessToken,
-              refreshToken: user.stsTokenManager.refreshToken,
-            })
-          );
-        } else {
-          dispatch(saveUser(undefined));
-        }
-      });
-    },
-    [
-      /* auth, dispatch */
-    ]
-  );
+  const { user, setUser } = useUserContext();
+  const [isAuthed, setIsAuthed] = useState<boolean>(false);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("user connected :", user); // ajoutez cette ligne
+        setUser(user);
+        setIsAuthed(true);
+      } else {
+        console.log("user disconnected");
+        setUser(null);
+        setIsAuthed(false);
+      }
+    });
+  }, []);
 
   return (
     <IonReactRouter>
       <IonRouterOutlet>
         <Switch>
-          <Route path="/register" exact component={Register} />
-          <Route path="/login" exact component={Login} />
-          {/*           <Route
-            exact
-            path="/login"
-            render={(props) => {
-              return isAuth ? <Home {...props} /> : <Login />;
-            }}
-          /> */}
-          <Route path="/reset" exact component={Reset} />
+          {isAuthed ? (
+            <>
+              <Route path="/login" exact component={Login} />
+              <Route path="/register" exact component={Register} />
+              <Route path="/reset" exact component={Reset} />
+              <Redirect exact from="/home" to="/login" />
+            </>
+          ) : (
+            <>
+              <Redirect exact from="/login" to="/home" />
+              <Redirect exact from="/register" to="/home" />
+              <Redirect exact from="/reset" to="/home" />
+              <Route path="/home" exact component={Home} />
+            </>
+          )}
           <Redirect exact from="/" to="/login" />
-          <ProtectedRoute path="/home" exact component={Home} />
         </Switch>
       </IonRouterOutlet>
     </IonReactRouter>
@@ -101,38 +84,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-/* const RoutingSystem: React.FC = () => {
-  return (
-    <IonReactRouter>
-      <IonRouterOutlet>
-        <Route path="/" exact component={Home} />
-        <Route path="/home" exact component={Home} />
-        <Route path="/login" exact component={Login} />
-        <Route path="/reset" exact component={Reset} />
-        <Route path="/register" exact component={Register} />
-        <Route path="/dashboard" component={Dashboard} />
-      </IonRouterOutlet>
-    </IonReactRouter>
-  );
-};
-
-const App: React.FC = () => {
-  const [busy, setBusy] = useState<boolean>(true);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    getCurrentUser().then((user) => {
-      if (user) {
-        window.history.replaceState({}, "", "/home");
-      } else {
-        window.history.replaceState({}, "", "/login");
-      }
-      setBusy(false);
-    });
-  }, []);
-
-  return <IonApp>{busy ? <IonSpinner /> : <RoutingSystem />}</IonApp>;
-};
-
-export default App; */

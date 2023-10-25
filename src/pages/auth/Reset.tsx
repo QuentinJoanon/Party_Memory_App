@@ -15,25 +15,27 @@ import { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 // import { signIn } from "../../firebaseConfig";
 import Toast from "../../components/Toast";
-import { useDispatch } from "react-redux";
-import { setUser } from "../../reducers/userSlice";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+import { resetPassword } from "../../firebaseConfig";
 
 const Reset: React.FC = () => {
   const [email, setEmail] = useState<string>("");
+  const [messageToast, setMessageToast] = useState<string>("");
+  const [isOpen, setIsOpen] = useState(false);
+  const history = useHistory();
 
-  const auth = getAuth();
-  const handleReset = () => {
-    sendPasswordResetEmail(auth, email)
-      .then(() => {
-        console.log("success");
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log("An error has occured: ", errorCode, errorMessage);
-      });
-  };
+  async function handleReset() {
+    const resetRequest = await resetPassword(email);
+    if (resetRequest) {
+      setIsOpen(true);
+      setMessageToast(
+        "Si votre adresse email est valide, vous allez recevoir un email de réinitialisation."
+      );
+    } else {
+      setIsOpen(true);
+      setMessageToast("Une erreur est survenue.");
+    }
+  }
 
   return (
     <IonPage>
@@ -43,8 +45,6 @@ const Reset: React.FC = () => {
             <IonCardHeader>
               <IonCardTitle>Party Memory</IonCardTitle>
             </IonCardHeader>
-            {/*             <IonLoading message="Connexion..." duration={0} isOpen={busy} />
-             */}{" "}
             <IonCardContent>
               <IonItem>
                 <IonInput
@@ -52,7 +52,8 @@ const Reset: React.FC = () => {
                   type="email"
                   labelPlacement="floating"
                   name="email"
-                  onIonChange={(e: any) => setEmail(e.target.value)}
+                  value={email}
+                  onIonInput={(e: any) => setEmail(e.target.value)}
                   required
                 ></IonInput>
               </IonItem>
@@ -64,11 +65,13 @@ const Reset: React.FC = () => {
               >
                 Réinitialiser
               </IonButton>
+              <IonButton fill="clear" expand="full">
+                <Link to="/login">Revenir à l'écran de connexion</Link>
+              </IonButton>
             </IonCardContent>
           </IonCard>
         </div>
-        {/*         <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
-         */}{" "}
+        <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
       </IonContent>
     </IonPage>
   );

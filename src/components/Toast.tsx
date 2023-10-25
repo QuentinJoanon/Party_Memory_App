@@ -12,7 +12,7 @@ const Toast: React.FC<ToastProps> = ({ message, isOpen, setIsOpen }) => {
     <IonToast
       isOpen={isOpen}
       message={message}
-      duration={2000}
+      duration={3000}
       onDidDismiss={() => setIsOpen(false)}
     ></IonToast>
   );

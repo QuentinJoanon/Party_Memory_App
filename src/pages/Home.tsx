@@ -16,6 +16,9 @@ import {
 import "./Home.scss";
 import { gridOutline, trashOutline } from "ionicons/icons";
 import MemberBanner from "../components/MemberBanner";
+import { getAuth } from "firebase/auth";
+import { app, getCurrentUser } from "../firebaseConfig";
+import { useEffect, useState } from "react";
 
 const Home: React.FC = () => {
   return (

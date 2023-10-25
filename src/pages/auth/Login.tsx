@@ -15,17 +15,17 @@ import { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 // import { signIn } from "../../firebaseConfig";
 import Toast from "../../components/Toast";
-import { useDispatch } from "react-redux";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { loginUser } from "../../firebaseConfig";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-
-  const history = useHistory();
-  /*   const [busy, setBusy] = useState<boolean>(false);
   const [messageToast, setMessageToast] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
+  const [busy, setBusy] = useState<boolean>(false);
+  const history = useHistory();
+  /*   
   const dispatch = useDispatch();
 
   async function login() {
@@ -38,7 +38,6 @@ const Login: React.FC = () => {
           email: userCredential.email,
         })
       );
-      setMessageToast("Connexion réussie");
       setIsOpen(true);
       setBusy(false);
       history.replace("/home");
@@ -49,9 +48,25 @@ const Login: React.FC = () => {
     setBusy(false);
   } */
 
-  const auth = getAuth();
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
+  async function handleLogin() {
+    setBusy(true);
+    const user = await loginUser(email, password);
+    if (user && user.emailVerified) {
+      setIsOpen(true);
+      setMessageToast("Connexion réussie");
+      history.replace("/home");
+    } else if (user && !user.emailVerified) {
+      setMessageToast(
+        "Email non vérifié, veuillez consulter votre boîte mail."
+      );
+      setIsOpen(true);
+    } else {
+      setMessageToast("Email ou mot de passe incorrect");
+      setIsOpen(true);
+    }
+    setBusy(false);
+
+    /*     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
         console.log("Singed in user: ", user);
@@ -61,8 +76,8 @@ const Login: React.FC = () => {
         const errorCode = error.code;
         const errorMessage = error.message;
         console.log("An error occured: ", errorCode, errorMessage);
-      });
-  };
+      }); */
+  }
 
   return (
     <IonPage>
@@ -72,8 +87,7 @@ const Login: React.FC = () => {
             <IonCardHeader>
               <IonCardTitle>Party Memory</IonCardTitle>
             </IonCardHeader>
-            {/*             <IonLoading message="Connexion..." duration={0} isOpen={busy} />
-             */}{" "}
+            <IonLoading message="Connexion..." duration={0} isOpen={busy} />
             <IonCardContent>
               <IonItem>
                 <IonInput
@@ -81,7 +95,8 @@ const Login: React.FC = () => {
                   type="email"
                   labelPlacement="floating"
                   name="email"
-                  onIonChange={(e: any) => setEmail(e.target.value)}
+                  value={email}
+                  onIonInput={(e: any) => setEmail(e.target.value)}
                   required
                 ></IonInput>
               </IonItem>
@@ -90,13 +105,14 @@ const Login: React.FC = () => {
                   label="Mot de passe"
                   type="password"
                   labelPlacement="floating"
+                  value={password}
                   name="password"
-                  onIonChange={(e: any) => setPassword(e.target.value)}
+                  onIonInput={(e: any) => setPassword(e.target.value)}
                   required
                 ></IonInput>
               </IonItem>
               <IonButton className="forgot-button" fill="clear" expand="full">
-                Mot de passe/identifiant oublié
+                <Link to="/reset">Mot de passe/identifiant oublié</Link>
               </IonButton>
               <IonButton
                 id="open-toast"
@@ -112,8 +128,7 @@ const Login: React.FC = () => {
             </IonCardContent>
           </IonCard>
         </div>
-        {/*         <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
-         */}{" "}
+        <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
       </IonContent>
     </IonPage>
   );

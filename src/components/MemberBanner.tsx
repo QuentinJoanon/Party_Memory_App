@@ -1,29 +1,19 @@
 import { IonAvatar, IonButton, IonItem, IonLabel, IonList } from "@ionic/react";
 import "./MemberBanner.scss";
-import { useDispatch, useSelector } from "react-redux";
-import { clearUser } from "../reducers/userSlice";
-import { RootState } from "../redux/store";
 // import { logoutUser } from "../firebaseConfig";
 import { useHistory } from "react-router";
 import { getAuth, signOut } from "firebase/auth";
+import { logoutUser } from "../firebaseConfig";
+import { useUserContext } from "../context/user";
 
 const MemberBanner: React.FC = () => {
-  /*   const userEmail = useSelector((state: RootState) => state.user.email);
-  const dispatch = useDispatch();
-  console.log(userEmail);
-  */
+  const { user } = useUserContext();
   const history = useHistory();
-  const auth = getAuth();
   function logout() {
-    signOut(auth)
-      .then(() => {
-        console.log("user signed out");
-        history.replace("/");
-      })
-      .catch((error) => {
-        console.log("error", error);
-      });
+    logoutUser();
+    history.replace("/login");
   }
+  console.log("User in MemberBanner:", user); // ajoutez cette ligne
 
   return (
     <IonList className="member-container" lines="none">
@@ -36,7 +26,7 @@ const MemberBanner: React.FC = () => {
         </IonAvatar>
         <IonLabel>
           <h1>Quentin Joanon</h1>
-          {/*  <p>{userEmail}</p> */}
+          <p>{user?.email}</p>
           <p>
             Membre <span className="account-type">Premium</span>
           </p>
