@@ -21,7 +21,7 @@ export const firebaseConfig = {
   appId: "1:807759682613:web:d3ada7c2cd624635c4657c",
   measurementId: "G-0RYDV44JHM",
 };
-
+/* 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -71,4 +71,4 @@ export async function signUp(email: string, password: string) {
     // const errorMessage = error.message;
     return error;
   }
-}
+} */

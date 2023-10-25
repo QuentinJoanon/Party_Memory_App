@@ -16,16 +16,17 @@ import {
 import "./Register.scss";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Toast from "../components/Toast";
+import Toast from "../../components/Toast";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-import { firebaseConfig, signUp } from "../firebaseConfig";
+// import { firebaseConfig, signUp } from "../../firebaseConfig";
 
 const Register: React.FC = () => {
-  const [busy, setBusy] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [cPassword, setCPassword] = useState<string>("");
+
+  /*   const [busy, setBusy] = useState<boolean>(false);
   const [messageToast, setMessageToast] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
 
@@ -52,7 +53,23 @@ const Register: React.FC = () => {
       setIsOpen(true);
     }
     setBusy(false);
-  }
+  } */
+
+  const auth = getAuth();
+  const handleRegister = () => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("Registered user: ", user);
+        setEmail("");
+        setPassword("");
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log("Error ocured: ", errorCode, errorMessage);
+      });
+  };
 
   return (
     <IonPage>
@@ -61,12 +78,11 @@ const Register: React.FC = () => {
           <IonTitle>Inscription</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonLoading
+      {/*       <IonLoading
         message="Inscription en cours..."
         duration={0}
         isOpen={busy}
-      />
-
+      /> */}
       <IonContent fullscreen>
         <IonCard>
           <IonCardHeader>
@@ -93,7 +109,9 @@ const Register: React.FC = () => {
               <IonInput
                 label="Email"
                 type="email"
-                onIonChange={(e: any) => setEmail(e.target.value)}
+                onIonChange={(e: any) => {
+                  setEmail(e.target.value);
+                }}
                 labelPlacement="floating"
                 required
               ></IonInput>
@@ -126,7 +144,7 @@ const Register: React.FC = () => {
         <IonButton
           className="register-button"
           expand="full"
-          onClick={registerUser}
+          onClick={handleRegister}
         >
           Inscription
         </IonButton>
@@ -193,7 +211,8 @@ const Register: React.FC = () => {
             </IonItem>
           </IonCardContent>
         </IonCard>
-        <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
+        {/*         <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
+         */}{" "}
       </IonContent>
     </IonPage>
   );

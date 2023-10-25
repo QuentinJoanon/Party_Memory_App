@@ -13,19 +13,20 @@ import {
 import "./Login.scss";
 import { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import { signIn } from "../firebaseConfig";
-import Toast from "../components/Toast";
+// import { signIn } from "../../firebaseConfig";
+import Toast from "../../components/Toast";
 import { useDispatch } from "react-redux";
-import { setUser } from "../reducers/userSlice";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 const Login: React.FC = () => {
-  const [busy, setBusy] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  const history = useHistory();
+  /*   const [busy, setBusy] = useState<boolean>(false);
   const [messageToast, setMessageToast] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
-  const history = useHistory();
 
   async function login() {
     setBusy(true);
@@ -46,7 +47,22 @@ const Login: React.FC = () => {
       setIsOpen(true);
     }
     setBusy(false);
-  }
+  } */
+
+  const auth = getAuth();
+  const handleLogin = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("Singed in user: ", user);
+        history.replace("/home");
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log("An error occured: ", errorCode, errorMessage);
+      });
+  };
 
   return (
     <IonPage>
@@ -56,7 +72,8 @@ const Login: React.FC = () => {
             <IonCardHeader>
               <IonCardTitle>Party Memory</IonCardTitle>
             </IonCardHeader>
-            <IonLoading message="Connexion..." duration={0} isOpen={busy} />
+            {/*             <IonLoading message="Connexion..." duration={0} isOpen={busy} />
+             */}{" "}
             <IonCardContent>
               <IonItem>
                 <IonInput
@@ -85,7 +102,7 @@ const Login: React.FC = () => {
                 id="open-toast"
                 type="submit"
                 expand="full"
-                onClick={login}
+                onClick={handleLogin}
               >
                 Connexion
               </IonButton>
@@ -95,7 +112,8 @@ const Login: React.FC = () => {
             </IonCardContent>
           </IonCard>
         </div>
-        <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
+        {/*         <Toast message={messageToast} isOpen={isOpen} setIsOpen={setIsOpen} />
+         */}{" "}
       </IonContent>
     </IonPage>
   );

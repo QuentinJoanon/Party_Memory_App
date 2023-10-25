@@ -6,7 +6,7 @@ import {
   setupIonicReact,
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
-import { Redirect, Route } from "react-router-dom";
+import { Link, Redirect, Route, Switch } from "react-router-dom";
 import Menu from "./components/Menu";
 
 /* Core CSS required for Ionic components to work properly */
@@ -28,22 +28,88 @@ import "@ionic/react/css/display.css";
 /* Theme variables */
 import "./theme/variables.css";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
 import { useEffect, useState } from "react";
-import { getCurrentUser } from "./firebaseConfig";
+import { firebaseConfig } from "./firebaseConfig";
 import Dashboard from "./pages/Dashboard";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import Reset from "./pages/auth/Reset";
+import Secret from "./pages/protected/ProtectedRoute";
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { saveUser } from "./redux/slice/authSlice";
+import ProtectedRoute from "./pages/protected/ProtectedRoute";
 
 setupIonicReact();
 
-const RoutingSystem: React.FC = () => {
+const App: React.FC = () => {
+  initializeApp(firebaseConfig);
+  const auth = getAuth();
+  // const user = useSelector((state) => state.auth);
+  const isAuth = onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("user", user);
+    } else {
+      return false;
+    }
+  });
+  console.log("isAuth", isAuth);
+  // console.log("user from state", user);
+  const dispatch = useDispatch();
+  useEffect(
+    () => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          dispatch(
+            saveUser({
+              email: user.email,
+              accessToken: user.stsTokenManager.accessToken,
+              refreshToken: user.stsTokenManager.refreshToken,
+            })
+          );
+        } else {
+          dispatch(saveUser(undefined));
+        }
+      });
+    },
+    [
+      /* auth, dispatch */
+    ]
+  );
+
+  return (
+    <IonReactRouter>
+      <IonRouterOutlet>
+        <Switch>
+          <Route path="/register" exact component={Register} />
+          <Route path="/login" exact component={Login} />
+          {/*           <Route
+            exact
+            path="/login"
+            render={(props) => {
+              return isAuth ? <Home {...props} /> : <Login />;
+            }}
+          /> */}
+          <Route path="/reset" exact component={Reset} />
+          <Redirect exact from="/" to="/login" />
+          <ProtectedRoute path="/home" exact component={Home} />
+        </Switch>
+      </IonRouterOutlet>
+    </IonReactRouter>
+  );
+};
+
+export default App;
+
+/* const RoutingSystem: React.FC = () => {
   return (
     <IonReactRouter>
       <IonRouterOutlet>
         <Route path="/" exact component={Home} />
         <Route path="/home" exact component={Home} />
         <Route path="/login" exact component={Login} />
+        <Route path="/reset" exact component={Reset} />
         <Route path="/register" exact component={Register} />
         <Route path="/dashboard" component={Dashboard} />
       </IonRouterOutlet>
@@ -69,4 +135,4 @@ const App: React.FC = () => {
   return <IonApp>{busy ? <IonSpinner /> : <RoutingSystem />}</IonApp>;
 };
 
-export default App;
+export default App; */
