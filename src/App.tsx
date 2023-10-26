@@ -1,11 +1,12 @@
 import {
   IonApp,
   IonRouterOutlet,
+  IonSpinner,
   IonSplitPane,
   setupIonicReact,
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
-import { Redirect, Route } from "react-router-dom";
+import { Link, Redirect, Route, Switch } from "react-router-dom";
 import Menu from "./components/Menu";
 
 /* Core CSS required for Ionic components to work properly */
@@ -27,30 +28,46 @@ import "@ionic/react/css/display.css";
 /* Theme variables */
 import "./theme/variables.css";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Party from "./pages/Party";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import { useEffect, useState } from "react";
+import { auth, firebaseConfig } from "./firebaseConfig";
+import Reset from "./pages/auth/Reset";
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { UserContextProvider, useUserContext } from "./context/user";
+import { PrivateRoute, PublicRoute } from "./routerConfig";
 
 setupIonicReact();
 
 const App: React.FC = () => {
+  const { user, setUser } = useUserContext();
+  const [isAuthed, setIsAuthed] = useState<boolean>(false);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("user connected :", user); // ajoutez cette ligne
+        setUser(user);
+      } else {
+        console.log("user disconnected");
+        setUser(null);
+      }
+    });
+  }, []);
+
   return (
-    <IonApp>
-      <IonReactRouter>
-        <IonSplitPane contentId="main">
-          <Menu />
-          <IonRouterOutlet id="main">
-            <Route path="/" exact={true}>
-              <Redirect to="/login" />
-            </Route>
-            <Route path="/home" exact component={Home} />
-            <Route path="/login" exact component={Login} />
-            <Route path="/register" exact component={Register} />
-            <Route exact path="/party" component={Party} />
-          </IonRouterOutlet>
-        </IonSplitPane>
-      </IonReactRouter>
-    </IonApp>
+    <IonReactRouter>
+      <IonRouterOutlet>
+        <Switch>
+          <PrivateRoute component={Home} path="/home" exact />
+          <PublicRoute component={Login} path="/login" exact />
+          <PublicRoute component={Register} path="/register" exact />
+          <PublicRoute component={Reset} path="/reset" exact />
+          <Redirect exact from="/" to="/login" />
+        </Switch>
+      </IonRouterOutlet>
+    </IonReactRouter>
   );
 };
 
