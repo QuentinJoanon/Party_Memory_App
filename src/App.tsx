@@ -36,6 +36,7 @@ import Reset from "./pages/auth/Reset";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { UserContextProvider, useUserContext } from "./context/user";
+import { PrivateRoute, PublicRoute } from "./routerConfig";
 
 setupIonicReact();
 
@@ -48,11 +49,9 @@ const App: React.FC = () => {
       if (user) {
         console.log("user connected :", user); // ajoutez cette ligne
         setUser(user);
-        setIsAuthed(true);
       } else {
         console.log("user disconnected");
         setUser(null);
-        setIsAuthed(false);
       }
     });
   }, []);
@@ -61,21 +60,10 @@ const App: React.FC = () => {
     <IonReactRouter>
       <IonRouterOutlet>
         <Switch>
-          {isAuthed ? (
-            <>
-              <Route path="/login" exact component={Login} />
-              <Route path="/register" exact component={Register} />
-              <Route path="/reset" exact component={Reset} />
-              <Redirect exact from="/home" to="/login" />
-            </>
-          ) : (
-            <>
-              <Redirect exact from="/login" to="/home" />
-              <Redirect exact from="/register" to="/home" />
-              <Redirect exact from="/reset" to="/home" />
-              <Route path="/home" exact component={Home} />
-            </>
-          )}
+          <PrivateRoute component={Home} path="/home" exact />
+          <PublicRoute component={Login} path="/login" exact />
+          <PublicRoute component={Register} path="/register" exact />
+          <PublicRoute component={Reset} path="/reset" exact />
           <Redirect exact from="/" to="/login" />
         </Switch>
       </IonRouterOutlet>

@@ -7,6 +7,7 @@ export interface IUser {
 export type UserContextType = {
   user: IUser | null;
   setUser: React.Dispatch<React.SetStateAction<IUser | null>>;
+  isAuthed: boolean;
 };
 
 interface UserContextProviderProps {
@@ -16,15 +17,17 @@ interface UserContextProviderProps {
 const UserContext = createContext<UserContextType>({
   user: null,
   setUser: () => {},
+  isAuthed: false,
 });
 
 export const UserContextProvider: React.FC<UserContextProviderProps> = ({
   children,
 }) => {
   const [user, setUser] = useState<IUser | null>(null);
+  const isAuthed = user !== null;
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, isAuthed }}>
       {children}
     </UserContext.Provider>
   );
