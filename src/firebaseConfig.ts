@@ -1,6 +1,14 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   getAuth,
@@ -59,10 +67,34 @@ export async function getUserDocument(uid: string) {
   try {
     const docRef = doc(db, "users", uid);
     const docSnap = await getDoc(docRef);
-    // console.log(docSnap.data());
     return docSnap.data();
   } catch (error) {
     console.log("No such document!");
+  }
+}
+
+export async function addEventOnUserDocument(uid: string, eventName: string) {
+  try {
+    const docRef = doc(db, "users", uid);
+    await updateDoc(docRef, {
+      events: arrayUnion(eventName),
+    });
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+}
+
+export async function deleteEventOnUserDocument(
+  uid: string,
+  eventName: string
+) {
+  try {
+    const docRef = doc(db, "users", uid);
+    await updateDoc(docRef, {
+      events: arrayRemove(eventName),
+    });
+  } catch (e) {
+    console.error("Error adding document: ", e);
   }
 }
 
@@ -74,7 +106,7 @@ async function createUserDocument(
 ) {
   try {
     const docRef = doc(db, "users", uid);
-    await setDoc(docRef, {
+    await updateDoc(docRef, {
       firstName: firstName,
       lastName: lastName,
       subscriptionLevel: subscriptionLevel,

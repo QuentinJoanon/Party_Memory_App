@@ -10,6 +10,7 @@ export interface IUserData {
   firstName: string;
   lastName: string;
   subscriptionLevel: string;
+  events: string[];
 }
 
 export type UserContextType = {
