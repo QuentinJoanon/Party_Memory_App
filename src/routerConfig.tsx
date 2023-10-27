@@ -7,8 +7,7 @@ export const PrivateRoute: React.FC<{
   path: string;
   exact: boolean;
 }> = ({ component: Component, path, exact }) => {
-  // Notez la déstructuration ici
-  const { isAuthed } = useUserContext();
+  const { isAuthed, user } = useUserContext();
   return (
     <Route
       path={path}
@@ -25,7 +24,6 @@ export const PublicRoute: React.FC<{
   path: string;
   exact: boolean;
 }> = ({ component: Component, path, exact }) => {
-  // Et ici aussi
   const { isAuthed } = useUserContext();
   return (
     <Route

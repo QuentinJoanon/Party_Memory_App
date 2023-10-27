@@ -31,24 +31,27 @@ import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import { useEffect, useState } from "react";
-import { auth, firebaseConfig } from "./firebaseConfig";
+import { auth, firebaseConfig, getUserDocument } from "./firebaseConfig";
 import Reset from "./pages/auth/Reset";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { UserContextProvider, useUserContext } from "./context/user";
+import { IUserData, UserContextProvider, useUserContext } from "./context/user";
 import { PrivateRoute, PublicRoute } from "./routerConfig";
 
 setupIonicReact();
 
 const App: React.FC = () => {
-  const { user, setUser } = useUserContext();
-  const [isAuthed, setIsAuthed] = useState<boolean>(false);
+  const { user, setUser, userData, setUserData } = useUserContext();
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         console.log("user connected :", user); // ajoutez cette ligne
         setUser(user);
+        const data = await getUserDocument(user.uid);
+        if (data) {
+          setUserData(data as IUserData); // Maintenant, userData dans votre contexte contiendra les données de l'utilisateur
+        }
       } else {
         console.log("user disconnected");
         setUser(null);

@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   getAuth,
@@ -27,7 +27,7 @@ export const firebaseConfig = {
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-const analytics = getAnalytics(app);
+export const db = getFirestore(app);
 
 export async function getCurrentUser() {
   try {
@@ -55,15 +55,51 @@ export async function loginUser(email: string, password: string) {
   }
 }
 
-export async function registerUser(email: string, password: string) {
+export async function getUserDocument(uid: string) {
+  try {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+    // console.log(docSnap.data());
+    return docSnap.data();
+  } catch (error) {
+    console.log("No such document!");
+  }
+}
+
+async function createUserDocument(
+  uid: string,
+  firstName: string,
+  lastName: string,
+  subscriptionLevel: string
+) {
+  try {
+    const docRef = doc(db, "users", uid);
+    await setDoc(docRef, {
+      firstName: firstName,
+      lastName: lastName,
+      subscriptionLevel: subscriptionLevel,
+    });
+    console.log("Document written with ID: ", docRef.id);
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+}
+
+export async function registerUser(
+  email: string,
+  password: string,
+  firstName: string,
+  lastName: string
+) {
   try {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
       password
     );
-    sendEmailVerification(userCredential.user);
     const user = userCredential.user;
+    await sendEmailVerification(user);
+    await createUserDocument(user.uid, firstName, lastName, "Basique");
     console.log(user);
     return true;
   } catch (error) {
@@ -90,51 +126,3 @@ export async function resetPassword(email: string) {
     return false;
   }
 }
-
-/* 
-
-export function getCurrentUser() {
-  return new Promise((resolve, reject) => {
-    const unsubscribe = auth.onAuthStateChanged(function (user) {
-      if (user) {
-        resolve(user);
-      } else {
-        resolve(null);
-      }
-      unsubscribe();
-    });
-  });
-}
-
-export function logoutUser() {
-  return auth.signOut();
-}
-
-export async function signIn(email: string, password: string) {
-  try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    return userCredential.user;
-  } catch (error) {
-    return error;
-  }
-}
-
-export async function signUp(email: string, password: string) {
-  try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
-    return true;
-  } catch (error) {
-    // const errorCode = error.code;
-    // const errorMessage = error.message;
-    return error;
-  }
-} */

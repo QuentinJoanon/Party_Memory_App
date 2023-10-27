@@ -13,9 +13,7 @@ import {
 import "./Login.scss";
 import { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-// import { signIn } from "../../firebaseConfig";
 import Toast from "../../components/Toast";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { loginUser } from "../../firebaseConfig";
 
 const Login: React.FC = () => {
@@ -25,58 +23,27 @@ const Login: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [busy, setBusy] = useState<boolean>(false);
   const history = useHistory();
-  /*   
-  const dispatch = useDispatch();
-
-  async function login() {
-    setBusy(true);
-    const userCredential = await signIn(email, password);
-    console.log(userCredential.email);
-    if (userCredential.email) {
-      dispatch(
-        setUser({
-          email: userCredential.email,
-        })
-      );
-      setIsOpen(true);
-      setBusy(false);
-      history.replace("/home");
-    } else {
-      setMessageToast("Email ou mot de passe incorrect");
-      setIsOpen(true);
-    }
-    setBusy(false);
-  } */
 
   async function handleLogin() {
     setBusy(true);
     const user = await loginUser(email, password);
     if (user && user.emailVerified) {
+      console.log("user from login 1 :", user);
       setIsOpen(true);
       setMessageToast("Connexion réussie");
       history.replace("/home");
     } else if (user && !user.emailVerified) {
+      console.log("user from login 2 :", user.emailVerified);
       setMessageToast(
         "Email non vérifié, veuillez consulter votre boîte mail."
       );
       setIsOpen(true);
     } else {
+      console.log("user from login 3 :", user);
       setMessageToast("Email ou mot de passe incorrect");
       setIsOpen(true);
     }
     setBusy(false);
-
-    /*     signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log("Singed in user: ", user);
-        history.replace("/home");
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.log("An error occured: ", errorCode, errorMessage);
-      }); */
   }
 
   return (
