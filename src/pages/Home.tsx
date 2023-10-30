@@ -10,6 +10,7 @@ import {
   IonLabel,
   IonList,
   IonListHeader,
+  IonLoading,
   IonMenuButton,
   IonModal,
   IonPage,
@@ -17,19 +18,17 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import "./Home.scss";
-import { gridOutline, trashOutline } from "ionicons/icons";
 import MemberBanner from "../components/MemberBanner";
 import {
   addEventOnUserDocument,
   app,
   deleteEventOnUserDocument,
-  getCurrentUser,
   getUserDocument,
 } from "../firebaseConfig";
 import { FormEvent, useEffect, useState } from "react";
 import { IUserData, useUserContext } from "../context/user";
 import EventItem from "../components/EventItem";
-import { useHistory } from "react-router";
+import Toast from "../components/Toast";
 
 const Home: React.FC = () => {
   const { user, userData, setUserData } = useUserContext();
@@ -37,17 +36,23 @@ const Home: React.FC = () => {
   const [showInput, setShowInput] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [deleteEventName, setDeleteEventName] = useState<string>("");
-  const history = useHistory();
+  const [messageToast, setMessageToast] = useState<string>("");
+  const [isOpenToast, setIsOpenToast] = useState(false);
+  const [busy, setBusy] = useState<boolean>(false);
 
   async function handleSubmit(e: FormEvent) {
+    setBusy(true);
     e.preventDefault();
     if (user !== null) {
       await addEventOnUserDocument(user.uid, eventName);
       const updatedData = await getUserDocument(user.uid);
       if (updatedData) {
         setUserData(updatedData as IUserData);
+        setIsOpenToast(true);
+        setMessageToast("Evènement ajouté avec succès !");
       }
     }
+    setBusy(false);
   }
 
   async function deleteEvent(event: string) {
@@ -62,7 +67,7 @@ const Home: React.FC = () => {
 
   const eventList = userData?.events.map((event) => (
     <EventItem
-      key={event}
+      key={event.name}
       event={event}
       setIsOpen={setIsOpen}
       setDeleteEventName={setDeleteEventName}
@@ -81,6 +86,7 @@ const Home: React.FC = () => {
       </IonHeader>
 
       <IonContent fullscreen>
+        <IonLoading message="Connexion..." duration={0} isOpen={busy} />
         <MemberBanner />
         <div className="add-container">
           <IonButton
@@ -132,6 +138,11 @@ const Home: React.FC = () => {
           ]}
           onDidDismiss={() => setIsOpen(false)}
         ></IonAlert>
+        <Toast
+          message={messageToast}
+          isOpen={isOpenToast}
+          setIsOpen={setIsOpenToast}
+        />
       </IonContent>
     </IonPage>
   );

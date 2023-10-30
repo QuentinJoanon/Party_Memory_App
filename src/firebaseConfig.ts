@@ -18,6 +18,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
+import slugify from "./utils/slugify";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -50,6 +51,27 @@ export async function getCurrentUser() {
   }
 }
 
+export async function getCurrentEvent(uid: string, eventSlug: string) {
+  try {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      const events = userData?.events || [];
+      const currentEvent = events.filter(
+        (event: { slug: string }) => event.slug !== eventSlug
+      );
+      console.log("current event : " + currentEvent);
+      return currentEvent;
+    } else {
+      console.log("No such document!");
+    }
+  } catch (error) {
+    console.log("No such document!");
+  }
+}
+
 export async function loginUser(email: string, password: string) {
   try {
     const userCredential = await signInWithEmailAndPassword(
@@ -73,9 +95,10 @@ export async function getUserDocument(uid: string) {
   }
 }
 
-export async function addEventOnUserDocument(uid: string, eventName: string) {
+export async function addPictureOnUserEvent(uid: string, eventName: string) {
   try {
     const docRef = doc(db, "users", uid);
+
     await updateDoc(docRef, {
       events: arrayUnion(eventName),
     });
@@ -84,17 +107,45 @@ export async function addEventOnUserDocument(uid: string, eventName: string) {
   }
 }
 
-export async function deleteEventOnUserDocument(
-  uid: string,
-  eventName: string
-) {
+export async function addEventOnUserDocument(uid: string, eventName: string) {
   try {
     const docRef = doc(db, "users", uid);
+
+    const newEvent = {
+      name: eventName,
+      slug: slugify(eventName),
+      photos: [],
+    };
+
     await updateDoc(docRef, {
-      events: arrayRemove(eventName),
+      events: arrayUnion(newEvent),
     });
   } catch (e) {
     console.error("Error adding document: ", e);
+  }
+}
+
+export async function deleteEventOnUserDocument(
+  uid: string,
+  eventSlug: string
+) {
+  try {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      const events = userData?.events || [];
+      const updatedEvents = events.filter(
+        (event: { slug: string }) => event.slug !== eventSlug
+      );
+
+      await updateDoc(docRef, { events: updatedEvents });
+    } else {
+      console.log("No such document!");
+    }
+  } catch (e) {
+    console.error("Error deleting event: ", e);
   }
 }
 
