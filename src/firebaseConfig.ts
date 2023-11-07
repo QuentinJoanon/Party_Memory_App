@@ -18,6 +18,12 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
 import slugify from "./utils/slugify";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -37,6 +43,29 @@ export const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+export async function uploadPhoto(uid: string, eventSlug: string, file: File) {
+  const storage = getStorage();
+  const storageRef = ref(storage, `${uid}/${eventSlug}/${file.name}`);
+  const uploadTask = uploadBytesResumable(storageRef, file);
+
+  return new Promise<string>((resolve, reject) => {
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // Vous pouvez utiliser snapshot pour suivre la progression de l'upload
+      },
+      (error) => {
+        console.error("Upload failed:", error);
+        reject(error);
+      },
+      async () => {
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        resolve(downloadURL);
+      }
+    );
+  });
+}
 
 export async function getCurrentUser() {
   try {
@@ -95,13 +124,33 @@ export async function getUserDocument(uid: string) {
   }
 }
 
-export async function addPictureOnUserEvent(uid: string, eventName: string) {
+export async function addPictureOnUserEvent(
+  uid: string,
+  eventSlug: string,
+  downloadURL: string
+) {
   try {
     const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
 
-    await updateDoc(docRef, {
-      events: arrayUnion(eventName),
-    });
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      const events = userData?.events || [];
+      const updatedEvents = events.map(
+        (event: { name: string; slug: string; photos: string[] }) => {
+          if (event.slug === eventSlug) {
+            return {
+              ...event,
+              photos: [...event.photos, downloadURL],
+            };
+          }
+          return event;
+        }
+      );
+      await updateDoc(docRef, { events: updatedEvents });
+    } else {
+      console.log("No such document!");
+    }
   } catch (e) {
     console.error("Error adding document: ", e);
   }
