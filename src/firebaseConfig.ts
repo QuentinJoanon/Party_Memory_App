@@ -43,9 +43,21 @@ export const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage();
+
+export async function downloadPhoto(pictureUrl: string) {
+  const httpsReference = ref(storage, pictureUrl);
+  try {
+    const downloadURL = await getDownloadURL(httpsReference);
+    console.log(downloadURL); // Pour le débogage, vous pouvez garder cette ligne pour vérifier que l'URL est correcte.
+    return downloadURL; // Retourne simplement l'URL pour être utilisée par la fonction de téléchargement.
+  } catch (error) {
+    console.error("Error fetching download URL: ", error);
+    return false; // Ou vous pourriez rejeter l'erreur pour la traiter plus loin.
+  }
+}
 
 export async function uploadPhoto(uid: string, eventSlug: string, file: File) {
-  const storage = getStorage();
   const storageRef = ref(storage, `${uid}/${eventSlug}/${file.name}`);
   const uploadTask = uploadBytesResumable(storageRef, file);
 
