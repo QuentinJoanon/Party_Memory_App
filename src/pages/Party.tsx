@@ -22,6 +22,7 @@ import { FormEvent, useEffect, useState } from "react";
 import {
   addPictureOnUserEvent,
   db,
+  deletePhoto,
   getCurrentEvent,
   getUserDocument,
   uploadPhoto,
@@ -40,6 +41,8 @@ const Party: React.FC<PartyPageProps> = ({ match }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [focusPicture, setFocusPicture] = useState("");
   const [openFocus, setOpenFocus] = useState(false);
+  const [alertIsOpen, setAlertIsOpen] = useState(false);
+  const [deletePictureUrl, setDeletePictureUrl] = useState("");
 
   const pictureEvent = userData?.events.find(
     (event) => event.slug === match.params.slug
@@ -73,6 +76,18 @@ const Party: React.FC<PartyPageProps> = ({ match }) => {
     }
   }
 
+  async function deletePicture(pictureUrl: string) {
+    if (user) {
+      await deletePhoto(user?.uid, pictureUrl, match.params.slug);
+
+      const updatedData = await getUserDocument(user.uid);
+      if (updatedData) {
+        setUserData(updatedData as IUserData);
+        setOpenFocus(false);
+      }
+    }
+  }
+
   return (
     <IonPage>
       <IonHeader>
@@ -90,6 +105,8 @@ const Party: React.FC<PartyPageProps> = ({ match }) => {
           picture={focusPicture}
           openFocus={openFocus}
           setOpenFocus={setOpenFocus}
+          setAlertIsOpen={setAlertIsOpen}
+          setDeletePictureUrl={setDeletePictureUrl}
         />
         <IonList>
           <IonListHeader>
@@ -123,6 +140,21 @@ const Party: React.FC<PartyPageProps> = ({ match }) => {
         <IonList className="gallery-container" lines="none">
           {pictureList}
         </IonList>
+        <IonAlert
+          className="alert"
+          isOpen={alertIsOpen}
+          header="ATTENTION"
+          subHeader="Voulez-vous vraiment supprimer cette photo ?"
+          buttons={[
+            { text: "ANNULER", role: "cancel" },
+            {
+              text: "SUPPRIMER",
+              cssClass: "alert-button-danger",
+              handler: () => deletePicture(deletePictureUrl),
+            },
+          ]}
+          onDidDismiss={() => setAlertIsOpen(false)}
+        ></IonAlert>
       </IonContent>
     </IonPage>
   );

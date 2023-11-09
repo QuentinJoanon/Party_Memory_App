@@ -23,6 +23,7 @@ import {
   ref,
   uploadBytesResumable,
   getDownloadURL,
+  deleteObject,
 } from "firebase/storage";
 import slugify from "./utils/slugify";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -49,11 +50,54 @@ export async function downloadPhoto(pictureUrl: string) {
   const httpsReference = ref(storage, pictureUrl);
   try {
     const downloadURL = await getDownloadURL(httpsReference);
-    console.log(downloadURL); // Pour le débogage, vous pouvez garder cette ligne pour vérifier que l'URL est correcte.
-    return downloadURL; // Retourne simplement l'URL pour être utilisée par la fonction de téléchargement.
+    return downloadURL;
   } catch (error) {
     console.error("Error fetching download URL: ", error);
-    return false; // Ou vous pourriez rejeter l'erreur pour la traiter plus loin.
+    return false;
+  }
+}
+
+export async function deletePhoto(
+  uid: string,
+  photoUrl: string,
+  eventSlug: string
+) {
+  try {
+    const httpsReference = ref(storage, photoUrl);
+    await deleteObject(httpsReference);
+
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      const events = userData?.events || [];
+      let eventIndex = events.findIndex(
+        (event: { slug: string }) => event.slug === eventSlug
+      );
+
+      if (eventIndex !== -1) {
+        const updatedEvents = [...events];
+
+        // Mettez à jour le tableau des photos pour l'événement spécifique
+        updatedEvents[eventIndex].photos = updatedEvents[
+          eventIndex
+        ].photos.filter((photo: string) => photo !== photoUrl);
+        console.log(updatedEvents);
+
+        // Mettez à jour le tableau des événements dans Firestore
+        await updateDoc(docRef, {
+          events: updatedEvents,
+        });
+      }
+    } else {
+      console.log("No such document!");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error fetching download URL: ", error);
+    return false;
   }
 }
 
