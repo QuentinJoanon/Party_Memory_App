@@ -1,6 +1,14 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   getAuth,
@@ -10,6 +18,14 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import slugify from "./utils/slugify";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -28,6 +44,84 @@ export const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage();
+
+export async function downloadPhoto(pictureUrl: string) {
+  const httpsReference = ref(storage, pictureUrl);
+  try {
+    const downloadURL = await getDownloadURL(httpsReference);
+    return downloadURL;
+  } catch (error) {
+    console.error("Error fetching download URL: ", error);
+    return false;
+  }
+}
+
+export async function deletePhoto(
+  uid: string,
+  photoUrl: string,
+  eventSlug: string
+) {
+  try {
+    const httpsReference = ref(storage, photoUrl);
+    await deleteObject(httpsReference);
+
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      const events = userData?.events || [];
+      let eventIndex = events.findIndex(
+        (event: { slug: string }) => event.slug === eventSlug
+      );
+
+      if (eventIndex !== -1) {
+        const updatedEvents = [...events];
+
+        // Mettez à jour le tableau des photos pour l'événement spécifique
+        updatedEvents[eventIndex].photos = updatedEvents[
+          eventIndex
+        ].photos.filter((photo: string) => photo !== photoUrl);
+        console.log(updatedEvents);
+
+        // Mettez à jour le tableau des événements dans Firestore
+        await updateDoc(docRef, {
+          events: updatedEvents,
+        });
+      }
+    } else {
+      console.log("No such document!");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error fetching download URL: ", error);
+    return false;
+  }
+}
+
+export async function uploadPhoto(uid: string, eventSlug: string, file: File) {
+  const storageRef = ref(storage, `${uid}/${eventSlug}/${file.name}`);
+  const uploadTask = uploadBytesResumable(storageRef, file);
+
+  return new Promise<string>((resolve, reject) => {
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // Vous pouvez utiliser snapshot pour suivre la progression de l'upload
+      },
+      (error) => {
+        console.error("Upload failed:", error);
+        reject(error);
+      },
+      async () => {
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        resolve(downloadURL);
+      }
+    );
+  });
+}
 
 export async function getCurrentUser() {
   try {
@@ -39,6 +133,27 @@ export async function getCurrentUser() {
     }
   } catch (error) {
     return false;
+  }
+}
+
+export async function getCurrentEvent(uid: string, eventSlug: string) {
+  try {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      const events = userData?.events || [];
+      const currentEvent = events.filter(
+        (event: { slug: string }) => event.slug !== eventSlug
+      );
+      console.log("current event : " + currentEvent);
+      return currentEvent;
+    } else {
+      console.log("No such document!");
+    }
+  } catch (error) {
+    console.log("No such document!");
   }
 }
 
@@ -59,10 +174,83 @@ export async function getUserDocument(uid: string) {
   try {
     const docRef = doc(db, "users", uid);
     const docSnap = await getDoc(docRef);
-    // console.log(docSnap.data());
     return docSnap.data();
   } catch (error) {
     console.log("No such document!");
+  }
+}
+
+export async function addPictureOnUserEvent(
+  uid: string,
+  eventSlug: string,
+  downloadURL: string
+) {
+  try {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      const events = userData?.events || [];
+      const updatedEvents = events.map(
+        (event: { name: string; slug: string; photos: string[] }) => {
+          if (event.slug === eventSlug) {
+            return {
+              ...event,
+              photos: [...event.photos, downloadURL],
+            };
+          }
+          return event;
+        }
+      );
+      await updateDoc(docRef, { events: updatedEvents });
+    } else {
+      console.log("No such document!");
+    }
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+}
+
+export async function addEventOnUserDocument(uid: string, eventName: string) {
+  try {
+    const docRef = doc(db, "users", uid);
+
+    const newEvent = {
+      name: eventName,
+      slug: slugify(eventName),
+      photos: [],
+    };
+
+    await updateDoc(docRef, {
+      events: arrayUnion(newEvent),
+    });
+  } catch (e) {
+    console.error("Error adding document: ", e);
+  }
+}
+
+export async function deleteEventOnUserDocument(
+  uid: string,
+  eventSlug: string
+) {
+  try {
+    const docRef = doc(db, "users", uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      const events = userData?.events || [];
+      const updatedEvents = events.filter(
+        (event: { slug: string }) => event.slug !== eventSlug
+      );
+
+      await updateDoc(docRef, { events: updatedEvents });
+    } else {
+      console.log("No such document!");
+    }
+  } catch (e) {
+    console.error("Error deleting event: ", e);
   }
 }
 
@@ -74,7 +262,7 @@ async function createUserDocument(
 ) {
   try {
     const docRef = doc(db, "users", uid);
-    await setDoc(docRef, {
+    await updateDoc(docRef, {
       firstName: firstName,
       lastName: lastName,
       subscriptionLevel: subscriptionLevel,

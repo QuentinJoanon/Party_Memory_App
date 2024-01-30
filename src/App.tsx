@@ -37,6 +37,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { IUserData, UserContextProvider, useUserContext } from "./context/user";
 import { PrivateRoute, PublicRoute } from "./routerConfig";
+import Party from "./pages/Party";
 
 setupIonicReact();
 
@@ -64,6 +65,7 @@ const App: React.FC = () => {
       <IonRouterOutlet>
         <Switch>
           <PrivateRoute component={Home} path="/home" exact />
+          <PrivateRoute component={Party} path="/event/:slug" exact />
           <PublicRoute component={Login} path="/login" exact />
           <PublicRoute component={Register} path="/register" exact />
           <PublicRoute component={Reset} path="/reset" exact />

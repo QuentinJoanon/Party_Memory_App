@@ -1,11 +1,8 @@
 import { IonAvatar, IonButton, IonItem, IonLabel, IonList } from "@ionic/react";
 import "./MemberBanner.scss";
-// import { logoutUser } from "../firebaseConfig";
 import { useHistory } from "react-router";
-import { getAuth, signOut } from "firebase/auth";
-import { getUserDocument, logoutUser } from "../firebaseConfig";
+import { logoutUser } from "../firebaseConfig";
 import { useUserContext } from "../context/user";
-import { useEffect, useState } from "react";
 
 const MemberBanner: React.FC = () => {
   const { user, userData } = useUserContext();
